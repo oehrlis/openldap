@@ -22,7 +22,7 @@ services:
 
 # OpenLDAP TNS service
   tnsldap:
-    image: oehrlis/openldap-tnsnames
+    image: oehrlis/openldap
     container_name: tnsldap
     hostname: tnsldap.${DOMAINNAME}
     networks:
@@ -39,6 +39,7 @@ services:
       SLAPD_LDAPS: "TRUE"
       SLAPD_ORCLNET: "TRUE"
       SLAPD_SUFFIX: ${SLAPD_SUFFIX}
+      SLAPD_ORGANIZATION: ${SLAPD_ORGANIZATION}
       
 networks:
   doe_lab_net:

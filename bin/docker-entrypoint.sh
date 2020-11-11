@@ -29,38 +29,39 @@ DOMAINNAME=${DOMAINNAME:-"trivadislabs.com"}                            # Set a 
 
 # - Environment Variables ---------------------------------------------------
 # slapd generic configuration
-SLAPD_CONF=${SLAPD_CONF:-"/etc/openldap/slapd.conf"}                    # slapd config file
-SLAPD_CONF_DIR=${SLAPD_CONF_DIR:-"/etc/openldap/slapd.d"}               # slapd config directory
-SLAPD_IPC_SOCKET=${SLAPD_IPC_SOCKET:-"/run/openldap/ldapi"}             # Socket name for IPC
-SLAPD_RUN_DIR=${SLAPD_RUN_DIR:-$(dirname $SLAPD_IPC_SOCKET)}            # slapd run directory
+export SLAPD_CONF=${SLAPD_CONF:-"/etc/openldap/slapd.conf"}                    # slapd config file
+export SLAPD_CONF_DIR=${SLAPD_CONF_DIR:-"/etc/openldap/slapd.d"}               # slapd config directory
+export SLAPD_IPC_SOCKET=${SLAPD_IPC_SOCKET:-"/run/openldap/ldapi"}             # Socket name for IPC
+export SLAPD_RUN_DIR=${SLAPD_RUN_DIR:-$(dirname $SLAPD_IPC_SOCKET)}            # slapd run directory
 
 # slapd local configuration
-SLAPD_LOCAL_DIR=${SLAPD_LOCAL_DIR:-"/opt/openldap"}                     # Local sladp folder
-SLAPD_LOCAL_CONFIG=${SLAPD_LOCAL_CONFIG:-"${SLAPD_LOCAL_DIR}/config"}   # Local Configuration file
-DB_DUMP_FILE=${DB_DUMP_FILE:-"${SLAPD_LOCAL_DIR}/dump/dbdump.ldif"}     # Dump file
+export SLAPD_LOCAL_DIR=${SLAPD_LOCAL_DIR:-"/opt/openldap"}                     # Local sladp folder
+export SLAPD_LOCAL_CONFIG=${SLAPD_LOCAL_CONFIG:-"${SLAPD_LOCAL_DIR}/config"}   # Local Configuration file
+export DB_DUMP_FILE=${DB_DUMP_FILE:-"${SLAPD_LOCAL_DIR}/dump/dbdump.ldif"}     # Dump file
 
 # sladp DB configuration
-SLAPD_DATA_DIR=${SLAPD_DATA_DIR:-"/var/lib/openldap/openldap-data"}     # slapd data directory
-SLAPD_SUFFIX=${SLAPD_SUFFIX:-"dc=trivadislabs,dc=com"}                  # Main suffix
-SLAPD_DOMAIN=${SLAPD_DOMAIN:-$(echo ${SLAPD_SUFFIX}|sed -E 's/^.*=(.*),.*/\1/')} # Domain
-SLAPD_ORGANIZATION=${SLAPD_ORGANIZATION:-"Trivadis Labs"}               # Organisation name
-SLAPD_ROOTDN=${SLAPD_ROOTDN:-"cn=root,${SLAPD_SUFFIX}"}                 # SLAPD root / admin user
-SLAPD_ROOT_PWD_FILE=${SLAPD_ROOT_PWD_FILE:-"${SLAPD_LOCAL_CONFIG}/.root_pwd.txt"} # Password file for root user
+export SLAPD_DATA_DIR=${SLAPD_DATA_DIR:-"/var/lib/openldap/openldap-data"}     # slapd data directory
+export SLAPD_SUFFIX=${SLAPD_SUFFIX:-"dc=trivadislabs,dc=com"}                  # Main suffix
+export SLAPD_DOMAIN=${SLAPD_DOMAIN:-$(echo ${SLAPD_SUFFIX}|sed -E 's/^.*=(.*),.*/\1/')} # Domain
+export SLAPD_ORGANIZATION=${SLAPD_ORGANIZATION:-"Trivadis Labs"}               # Organisation name
+export SLAPD_ROOTDN=${SLAPD_ROOTDN:-"cn=root,${SLAPD_SUFFIX}"}                 # SLAPD root / admin user
+export SLAPD_ROOT_PWD_FILE=${SLAPD_ROOT_PWD_FILE:-"${SLAPD_LOCAL_CONFIG}/.root_pwd.txt"} # Password file for root user
 SLAPD_ROOTPW=${SLAPD_ROOTPW:-""}                                        # default admin password
 
 # sladp LDAPS specific configuration
-SLAPD_LDAPS=${SLAPD_LDAPS:-"FALSE"}                                         # define if LDAPS is used
-SLAPD_LDAPS=$(echo $SLAPD_LDAPS | tr '[a-z]' '[A-Z]')                       # convert it to upper case
-SLAPD_CA_CERT=${SLAPD_CA_CERT:-"${SLAPD_LOCAL_CONFIG}/certs/ca_cert.pem"}   # default CA certificate 
-SLAPD_SSL_KEY=${SLAPD_SSL_KEY:-"${SLAPD_LOCAL_CONFIG}/certs/key.pem"}       # default certificate key 
-SLAPD_SSL_CERT=${SLAPD_SSL_CERT:-"${SLAPD_LOCAL_CONFIG}/certs/cert.pem"}    # default certificate 
+export SLAPD_LDAPS=${SLAPD_LDAPS:-"FALSE"}                                         # define if LDAPS is used
+export SLAPD_LDAPS=$(echo $SLAPD_LDAPS | tr '[a-z]' '[A-Z]')                       # convert it to upper case
+export SLAPD_CA_CERT=${SLAPD_CA_CERT:-"${SLAPD_LOCAL_CONFIG}/certs/ca_cert.pem"}   # default CA certificate 
+export SLAPD_SSL_KEY=${SLAPD_SSL_KEY:-"${SLAPD_LOCAL_CONFIG}/certs/key.pem"}       # default certificate key 
+export SLAPD_SSL_CERT=${SLAPD_SSL_CERT:-"${SLAPD_LOCAL_CONFIG}/certs/cert.pem"}    # default certificate 
 
 # common configuration
-SLAPD_ORCLNET=${SLAPD_ORCLNET:-"TRUE"}                                  # define if Oracle Net schema is loaded
-SLAPD_LOG_LEVEL=${SLAPD_LOG_LEVEL:-0}                                   # SLAPD log level
-LDAPADD_DEBUG_LEVEL=${LDAPADD_DEBUG_LEVEL:-1}                           # ldapadd / ldapmodify log level
+export SLAPD_ORCLNET=${SLAPD_ORCLNET:-"TRUE"}                                  # define if Oracle Net schema is loaded
+export SLAPD_LOG_LEVEL=${SLAPD_LOG_LEVEL:-0}                                   # SLAPD log level
+export LDAPADD_DEBUG_LEVEL=${LDAPADD_DEBUG_LEVEL:-4}                           # ldapadd / ldapmodify log level
 TMP_FILE=$(mktemp)                                                      # define a temp file
 BOOTSTRAP=0
+i=0
 # - EOF Environment Variables -----------------------------------------------
 
 # - Functions ---------------------------------------------------------------
@@ -255,15 +256,22 @@ EOF
 
     # handle race condition
     echo "INFO: Waiting for server ${_PID} to start..."
-    let i=0
-    while [[ ${i} -lt 60 ]]; do
-        printf "."
+    TIMEOUT=60                                      # default timeout in seconds
+    TIMEOUT=${TIMEOUT:-10}
+    WAIT_ITER=60                                    # default wait iternation
+    WAIT_TIME=$(($TIMEOUT / $WAIT_ITER))
+    NEXT_WAIT=1
+    STARTING=1
+    until [[ $STARTING -eq 0 ]] || [[ $(($NEXT_WAIT*$WAIT_TIME)) -ge $TIMEOUT ]]; do
+        echo -n "."
+        sleep $WAIT_TIME        # Wait for the wait time
         ldapsearch -Y EXTERNAL -H ldapi://$(_escurl ${SLAPD_IPC_SOCKET}) -s base -b '' >/dev/null 2>&1
-        test $? -eq 0 && break
-        sleep 1
-        let i=$(expr ${i} + 1)
+        STARTING=$?             # get return value
+        let NEXT_WAIT++         # increment wait counter
     done
+    ldapsearch -Y EXTERNAL -H ldapi://$(_escurl ${SLAPD_IPC_SOCKET}) -s base -b '' >/dev/null 2>&1
     if [[ $? -eq 0 ]] ; then
+        echo ""
         echo "INFO: Server running an ready to be configured ------------------------"
     else
         echo "ERR : Fail to start the server ----------------------------------------"
@@ -283,7 +291,7 @@ EOF
         echo "INFO: Add custom ldif configuration from ${SLAPD_LOCAL_CONFIG}/userldif ---"
         for f in ${SLAPD_LOCAL_CONFIG}/userldif/*.ldif ; do
             echo "> $f"
-            ldapmodify -Y EXTERNAL -H ldapi://$(_escurl ${SLAPD_IPC_SOCKET}) -f `_envsubst ${f}` -c -d "${LDAPADD_DEBUG_LEVEL}"
+            ldapmodify -x -D "${SLAPD_ROOTDN}" -w $(cat ${SLAPD_ROOT_PWD_FILE}) -H ldapi://$(_escurl ${SLAPD_IPC_SOCKET}) -f $(_envsubst ${f}) -c -d "${LDAPADD_DEBUG_LEVEL}"
         done
     fi
 
@@ -302,7 +310,7 @@ EOF
     fi
     echo "INFO: Finish bootstrap slapd ------------------------------------------"
 else
-    echo "INFO: User existing slapd configuration -------------------------------"
+    echo "INFO: Use existing slapd configuration -------------------------------"
     chmod -R 750 ${SLAPD_CONF_DIR}
     chmod -R 750 ${SLAPD_DATA_DIR}
     chown -R ldap:ldap ${SLAPD_CONF_DIR}
