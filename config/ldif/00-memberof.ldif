@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------------------
+# Trivadis AG, Business Development & Support (BDS)
+# Saegereistrasse 29, 8152 Glattbrugg, Switzerland
+# ---------------------------------------------------------------------------
+# Name.......: 00-memberof.ldif
+# Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
+# Date.......: 2020.06.25
+# Usage......: 00-memberof.ldif
+# Purpose....: LDIF file for ldif
+# Notes......:  
+# Reference..: 
+# License....: Apache License Version 2.0, January 2004 as shown
+#              at http://www.apache.org/licenses/
+# ---------------------------------------------------------------------------
+dn: cn=module,cn=config
+changetype: add
+cn: module
+objectClass: olcModuleList
+objectClass: top
+olcModuleLoad: memberof.so
+
+dn: olcOverlay=memberof,olcDatabase={1}mdb,cn=config
+changetype: add
+objectClass: olcConfig
+objectClass: olcMemberOf
+objectClass: olcOverlayConfig
+objectClass: top
+olcOverlay: memberof
+olcMemberOfDangling: ignore
+olcMemberOfRefInt: TRUE
+olcMemberOfGroupOC: groupOfNames
+olcMemberOfMemberAD: member
+olcMemberOfMemberOfAD: memberOf
+
+dn: cn=module,cn=config
+changetype: add
+cn: module
+objectClass: olcModuleList
+objectClass: top
+olcModuleLoad: refint.so
+
+dn: olcOverlay=refint,olcDatabase={1}mdb,cn=config
+changetype: add
+objectClass: olcConfig
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+objectClass: top
+olcOverlay: refint
+olcRefintAttribute: memberof member manager owner
+
+# --- EOF -------------------------------------------------------------------

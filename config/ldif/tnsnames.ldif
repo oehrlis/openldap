@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------------
+# Trivadis AG, Business Development & Support (BDS)
+# Saegereistrasse 29, 8152 Glattbrugg, Switzerland
+# ---------------------------------------------------------------------------
+# Name.......: 00-memberof.ldif
+# Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
+# Date.......: 2020.06.25
+# Usage......: 00-memberof.ldif
+# Purpose....: LDIF file for ldif
+# Notes......:  
+# Reference..: 
+# License....: Apache License Version 2.0, January 2004 as shown
+#              at http://www.apache.org/licenses/
+# ---------------------------------------------------------------------------
+dn: cn=mydb,cn=OracleContext,${SLAPD_SUFFIX}
+changetype: add
+objectclass: top
+objectclass: orclNetService
+cn: mydb
+orclNetDescString: (DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=myhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=mydb)))
+
+dn: cn=TEUS01,cn=OracleContext,${SLAPD_SUFFIX}
+changetype: add
+objectclass: top
+objectclass: orclNetService
+cn: TEUS01
+orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=eusdb)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=TEUS01_RW.trivadislabs.com)))
+# --- EOF -------------------------------------------------------------------

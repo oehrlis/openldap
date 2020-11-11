@@ -1,0 +1,46 @@
+# -----------------------------------------------------------------------
+# Trivadis AG, Business Development & Support (BDS)
+# Saegereistrasse 29, 8152 Glattbrugg, Switzerland
+# -----------------------------------------------------------------------
+# Name.......: docker-compose.yml
+# Author.....: Stefan Oehrli (oes) stefan.oehrli@trivadis.com
+# Editor.....: Stefan Oehrli
+# Date.......: 2020.11.11
+# Revision...: --
+# Purpose....: Docker compose file to create a OpenLDAP Instance
+# Notes......: --
+# Reference..: https://github.com/oehrlis/oudbase
+# License....: Apache License Version 2.0, January 2004 as shown
+#              at http://www.apache.org/licenses/
+# -----------------------------------------------------------------------
+# Modified...:
+# see git revision history with git log for more information on changes
+# -----------------------------------------------------------------------
+
+version: '3.5'
+services:
+
+# OpenLDAP TNS service
+  tnsldap:
+    image: oehrlis/openldap-tnsnames
+    container_name: tnsldap
+    hostname: tnsldap.${DOMAINNAME}
+    networks:
+      - doe_lab_net
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_VOLUME_BASE}/tnsldap/db:/var/lib/openldap/openldap-data:rw
+      - ./config:/opt/openldap/config
+    ports:
+      - "7389:389"
+      - "7636:636"
+    environment:
+      SLAPD_LOG_LEVEL: 256
+      SLAPD_LDAPS: "TRUE"
+      SLAPD_ORCLNET: "TRUE"
+      SLAPD_SUFFIX: ${SLAPD_SUFFIX}
+      
+networks:
+  doe_lab_net:
+    name: ${DOMAINNAME}
+# - EOF -----------------------------------------------------------------

@@ -1,0 +1,5 @@
+#ignore pem und certs file
+**/*.pem
+
+# ignore password file
+config/.root_pwd.txt

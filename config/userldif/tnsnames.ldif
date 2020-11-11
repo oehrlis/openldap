@@ -1,0 +1,13 @@
+dn: cn=mydb,cn=OracleContext,${SLAPD_SUFFIX}
+changetype: add
+objectclass: top
+objectclass: orclNetService
+cn: mydb
+orclNetDescString: (DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=myhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=mydb)))
+
+dn: cn=TEUS01,cn=OracleContext,${SLAPD_SUFFIX}
+changetype: add
+objectclass: top
+objectclass: orclNetService
+cn: TEUS01
+orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=eusdb)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=TEUS01_RW.trivadislabs.com)))
