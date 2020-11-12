@@ -21,7 +21,7 @@ set -o errexit          # exit when 1st unset variable found
 set -o pipefail         # pipefail exit after 1st piped commands failed
 # - Customization -----------------------------------------------------------
 # - just add/update any kind of customized environment variable here
-HOSTNAME=${HOSTNAME:-$(hostname -s)}                                    # Hostname, default just the short hostname
+HOSTNAME=$(hostname -s)                                                 # Hostname, default just the short hostname
 DOMAINNAME=${DOMAINNAME:-$(hostname -f| sed 's/^\.//;t;s/\./\n\./;D')}  # Domain Name, default just the domain part of hostname -f
 DOMAINNAME=${DOMAINNAME:-"trivadislabs.com"}                            # Set a default if still empty
 
@@ -29,24 +29,25 @@ DOMAINNAME=${DOMAINNAME:-"trivadislabs.com"}                            # Set a 
 
 # - Environment Variables ---------------------------------------------------
 # slapd generic configuration
-export SLAPD_CONF=${SLAPD_CONF:-"/etc/openldap/slapd.conf"}                    # slapd config file
-export SLAPD_CONF_DIR=${SLAPD_CONF_DIR:-"/etc/openldap/slapd.d"}               # slapd config directory
-export SLAPD_IPC_SOCKET=${SLAPD_IPC_SOCKET:-"/run/openldap/ldapi"}             # Socket name for IPC
-export SLAPD_RUN_DIR=${SLAPD_RUN_DIR:-$(dirname $SLAPD_IPC_SOCKET)}            # slapd run directory
+export SLAPD_CONF=${SLAPD_CONF:-"/etc/openldap/slapd.conf"}                         # slapd config file
+export LDAP_CONF=${LDAP_CONF:-"/etc/openldap/ldap.conf"}                         # slapd config file
+export SLAPD_CONF_DIR=${SLAPD_CONF_DIR:-"/etc/openldap/slapd.d"}                    # slapd config directory
+export SLAPD_IPC_SOCKET=${SLAPD_IPC_SOCKET:-"/run/openldap/ldapi"}                  # Socket name for IPC
+export SLAPD_RUN_DIR=${SLAPD_RUN_DIR:-$(dirname $SLAPD_IPC_SOCKET)}                 # slapd run directory
 
 # slapd local configuration
-export SLAPD_LOCAL_DIR=${SLAPD_LOCAL_DIR:-"/opt/openldap"}                     # Local sladp folder
-export SLAPD_LOCAL_CONFIG=${SLAPD_LOCAL_CONFIG:-"${SLAPD_LOCAL_DIR}/config"}   # Local Configuration file
-export DB_DUMP_FILE=${DB_DUMP_FILE:-"${SLAPD_LOCAL_DIR}/dump/dbdump.ldif"}     # Dump file
+export SLAPD_LOCAL_DIR=${SLAPD_LOCAL_DIR:-"/opt/openldap"}                          # Local sladp folder
+export SLAPD_LOCAL_CONFIG=${SLAPD_LOCAL_CONFIG:-"${SLAPD_LOCAL_DIR}/config"}        # Local Configuration file
+export DB_DUMP_FILE=${DB_DUMP_FILE:-"${SLAPD_LOCAL_DIR}/dump/dbdump.ldif"}          # Dump file
 
 # sladp DB configuration
-export SLAPD_DATA_DIR=${SLAPD_DATA_DIR:-"/var/lib/openldap/openldap-data"}     # slapd data directory
-export SLAPD_SUFFIX=${SLAPD_SUFFIX:-"dc=trivadislabs,dc=com"}                  # Main suffix
+export SLAPD_DATA_DIR=${SLAPD_DATA_DIR:-"/var/lib/openldap/openldap-data"}          # slapd data directory
+export SLAPD_SUFFIX=${SLAPD_SUFFIX:-"dc=trivadislabs,dc=com"}                       # Main suffix
 export SLAPD_DOMAIN=${SLAPD_DOMAIN:-$(echo ${SLAPD_SUFFIX}|sed -E 's/^.*=(.*),.*/\1/')} # Domain
-export SLAPD_ORGANIZATION=${SLAPD_ORGANIZATION:-"Trivadis Labs"}               # Organisation name
-export SLAPD_ROOTDN=${SLAPD_ROOTDN:-"cn=root,${SLAPD_SUFFIX}"}                 # SLAPD root / admin user
+export SLAPD_ORGANIZATION=${SLAPD_ORGANIZATION:-"Trivadis Labs"}                    # Organisation name
+export SLAPD_ROOTDN=${SLAPD_ROOTDN:-"cn=root,${SLAPD_SUFFIX}"}                      # SLAPD root / admin user
 export SLAPD_ROOT_PWD_FILE=${SLAPD_ROOT_PWD_FILE:-"${SLAPD_LOCAL_CONFIG}/.root_pwd.txt"} # Password file for root user
-SLAPD_ROOTPW=${SLAPD_ROOTPW:-""}                                        # default admin password
+SLAPD_ROOTPW=${SLAPD_ROOTPW:-""}                                                    # default admin password
 
 # sladp LDAPS specific configuration
 export SLAPD_LDAPS=${SLAPD_LDAPS:-"FALSE"}                                         # define if LDAPS is used
@@ -56,10 +57,10 @@ export SLAPD_SSL_KEY=${SLAPD_SSL_KEY:-"${SLAPD_LOCAL_CONFIG}/certs/key.pem"}    
 export SLAPD_SSL_CERT=${SLAPD_SSL_CERT:-"${SLAPD_LOCAL_CONFIG}/certs/cert.pem"}    # default certificate 
 
 # common configuration
-export SLAPD_ORCLNET=${SLAPD_ORCLNET:-"TRUE"}                                  # define if Oracle Net schema is loaded
-export SLAPD_LOG_LEVEL=${SLAPD_LOG_LEVEL:-0}                                   # SLAPD log level
-export LDAPADD_DEBUG_LEVEL=${LDAPADD_DEBUG_LEVEL:-4}                           # ldapadd / ldapmodify log level
-TMP_FILE=$(mktemp)                                                      # define a temp file
+export SLAPD_ORCLNET=${SLAPD_ORCLNET:-"TRUE"}                                       # define if Oracle Net schema is loaded
+export SLAPD_LOG_LEVEL=${SLAPD_LOG_LEVEL:-0}                                        # SLAPD log level
+export LDAPADD_DEBUG_LEVEL=${LDAPADD_DEBUG_LEVEL:-0}                                # ldapadd / ldapmodify log level
+TMP_FILE=$(mktemp)                                                                  # define a temp file
 BOOTSTRAP=0
 i=0
 # - EOF Environment Variables -----------------------------------------------
@@ -229,7 +230,7 @@ access to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth 
 
 # MDB database definitions ----------------------------------------------------
 database mdb
-access to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by dn.base="$SLAPD_ROOTDN" manage by * none
+access to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by dn.base="$SLAPD_ROOTDN" manage by * read by * search
 maxsize 1073741824
 suffix "${SLAPD_SUFFIX}"
 rootdn "${SLAPD_ROOTDN}"
@@ -238,8 +239,18 @@ password-hash {PBKDF2-SHA512}
 directory  ${SLAPD_DATA_DIR}
 
 # Indices to maintain ---------------------------------------------------------
-index   objectClass eq
-index   cn          eq
+index   objectClass     eq,pres
+index   ou,cn           eq,pres,sub
+index   uid             eq,pres,sub
+EOF
+
+    # add generic ldap.conf file
+    cat <<EOF > "$LDAP_CONF"
+BASE ${SLAPD_SUFFIX} 
+URI ldap://${HOSTNAME}.${DOMAINNAME}
+SIZELIMIT	12
+TIMELIMIT	15
+DEREF		never
 EOF
 
     echo "INFO: Generating configuration ----------------------------------------"
