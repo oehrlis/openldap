@@ -16,5 +16,5 @@ changetype: modify
 add: olcAccess
 olcAccess: {0}to attrs=userPassword by self write by anonymous auth by dn="${SLAPD_ROOTDN}" write by * none
 olcAccess: {1}to dn.base="" by * read
-olcAccess: {2}to * by self write by dn="${SLAPD_ROOTDN}" write by * read
+olcAccess: {2}to * by self write by dn="${SLAPD_ROOTDN}" write by * read by * search
 # --- EOF -------------------------------------------------------------------
