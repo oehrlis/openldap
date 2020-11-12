@@ -32,16 +32,28 @@ services:
       - ${DOCKER_VOLUME_BASE}/tnsldap/db:/var/lib/openldap/openldap-data:rw
       - ./config:/opt/openldap/config
     ports:
-      - "7389:389"
-      - "7636:636"
+      - "389:389"
+      - "636:636"
     environment:
+      SLAPD_SUFFIX:         ${SLAPD_SUFFIX}
+      SLAPD_ORGANIZATION:   ${SLAPD_ORGANIZATION}
+      SLAPD_ORCLNET:        "TRUE"
+      SLAPD_ROOTDN:         "cn=root,${SLAPD_SUFFIX}"
+      SLAPD_ROOTPW:
+      SLAPD_ROOT_PWD_FILE:
+      SLAPD_ORCLNET:        "TRUE"
+      SLAPD_LDAPS:          "TRUE" 
+      SLAPD_CA_CERT:
+      SLAPD_SSL_KEY:
+      SLAPD_SSL_CERT:
       SLAPD_LOG_LEVEL: 256
-      SLAPD_LDAPS: "TRUE"
-      SLAPD_ORCLNET: "TRUE"
-      SLAPD_SUFFIX: ${SLAPD_SUFFIX}
-      SLAPD_ORGANIZATION: ${SLAPD_ORGANIZATION}
+      DB_DUMP_FILE:
       
 networks:
   doe_lab_net:
     name: ${DOMAINNAME}
 # - EOF -----------------------------------------------------------------
+
+  
+
+
